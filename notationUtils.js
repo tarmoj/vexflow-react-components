@@ -449,7 +449,7 @@ export const notationInfoToLyString = notationInfo => {
             }
         }
     }
-    console.log("converted to ly: ", lyString)
+    //console.log("converted to ly: ", lyString)
     return lyString;
 };
 
