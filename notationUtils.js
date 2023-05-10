@@ -392,9 +392,11 @@ export const notationInfoToLyString = notationInfo => {
     for (let stave of notationInfo.staves) {
         let keyString = "";
         if (stave.key.endsWith("m")) { // minor
-            keyString =  stave.key.slice(0, -1).toLowerCase() + " \\minor "
+            const lyKeyNote = getLyNoteName(stave.key.slice(0, -1).toLowerCase());
+            keyString =  lyKeyNote + " \\minor "
         } else {
-            keyString = stave.key.toLowerCase() + " \\major "
+            const lyKeyNote = getLyNoteName(stave.key.toLowerCase());
+            keyString = lyKeyNote + " \\major "
         }
         lyString += `\\clef ${stave.clef} \\key ${keyString} \\time ${stave.time} \n`;
         for (let measure of stave.measures) {
@@ -447,7 +449,7 @@ export const notationInfoToLyString = notationInfo => {
             }
         }
     }
-    //console.log("converted to ly: ", lyString)
+    console.log("converted to ly: ", lyString)
     return lyString;
 };
 
