@@ -759,7 +759,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
         <Grid container direction={"column"} spacing={1}>
             { !showTimeAndClefInput  && // do not show the control in editor - then no choice, showLilypond should be true and the textarea always shown
                 <FormGroup>
-                    <FormControlLabel control={<Switch sx={{marginLeft: 1.1}} size={"small"} checked={showLilypond}
+                    <FormControlLabel control={<Switch sx={{marginLeft: 1.5}} size={"small"} checked={showLilypond}
                                                        onChange={() => {
                                                            setShowLilypond(!showLilypond);
                                                            if (resizeFunction) resizeFunction();

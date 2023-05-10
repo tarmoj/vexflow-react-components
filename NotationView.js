@@ -337,7 +337,7 @@ export function NotationView({
         let cursorX = -1, cursorColor="lightblue";
         if (noteToHighlight) {
             cursorX = noteToHighlight.getNoteHeadBeginX()-5;
-        } else  {
+        } else if (selectedNote)  {
             if (newStaveInfo[selectedNote.staff][selectedNote.measure] && selectedNote && selectedNote.note<0) { // last note
                 if ( newStaveInfo[selectedNote.staff][selectedNote.measure].staveNotes.length===0) {
                     cursorX = newStaveInfo[selectedNote.staff][selectedNote.measure].vfStave.getNoteStartX() + 10; // if not notes in the bar, draw it in the beginning
