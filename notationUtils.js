@@ -442,6 +442,8 @@ export const notationInfoToLyString = notationInfo => {
                 }
                 lyString += measure.endBar;
                 lyString += "\n";
+            } else {
+                lyString += " | \n"; // add empty bar if not notes
             }
         }
     }
