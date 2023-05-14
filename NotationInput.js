@@ -218,7 +218,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
         const measureIndex = selectedNote.measure >= 0 ? selectedNote.measure : 0; //notationInfo.staves[staff].measures.length>0 ? notationInfo.staves[staff].measures.length - 1 :0 ;
 
         const noteIndex = notationInfo.staves[staff].measures[measureIndex].notes.length; // index to the note after last one
-        console.log("indexes: ", measureIndex, noteIndex, staff);
+        //console.log("indexes: ", measureIndex, noteIndex, staff);
         replaceNote({note:noteIndex, measure: measureIndex, staff:staff}, keys, duration);
     }
 
