@@ -1,8 +1,6 @@
 
 export const defaultNotationInfo = {
     options: "", // scale, width, space etc, if needed
-    //currentStaff:  0,
-    //currentStaff:  0,
     // it were more logical if stave and key were defined here, but I will change it later...
     //key:"F",
     //time: "4/4",
@@ -15,13 +13,11 @@ export const defaultNotationInfo = {
                 number : 1, // optional
                 //startBar: "", // optional can be: |  ||  |. etc (lilypond style)  :|.
                 endBar: "|",
-                // also possible to define new key or clef here
-                // in the code -  if measure.hasOwnProperty.clef etc
                 notes: [
                     { clef: "treble", keys: ["g/4"], duration: "4", auto_stem: "true" ,
                         //tied: true, // tie is on the note, where it starts (similar to Lilypond logic
                         //color:"green"
-                        /*optional: text:"something", position:""*/ }, // cannot be empty, vf requires that the measure is filled... or perhaps there is a way to override it
+                        /*optional: text:"something", position:""*/ },
                 ]
             },
                 // // second measure etc
@@ -36,7 +32,7 @@ export const defaultNotationInfo = {
 
 };
 
-// params come in as encoded html, need to decode
+// H5P params come in as encoded html, need to decode
 export const  decodeHtml = (text) => {
     return text
         .replace(/&amp;/g, '&')
@@ -48,7 +44,7 @@ export const  decodeHtml = (text) => {
 
 
 // Deep clones an object
-export const deepClone = (obj) => { // from util/util
+export const deepClone = (obj) => {
     return JSON.parse(JSON.stringify(obj));
 };
 
@@ -171,22 +167,13 @@ export const parseLilypondString = (lyString) => {
             i += 1;
         } else if     ( ["|", "|.", "||",  ".|:", ":|.",   ":|.|:"].includes( chunks[i])) {
             barLine = chunks[i];
-            // if (i===chunks.length-1 && chunks[i]==="|" ) {
-            //     barLine = "|.";
-            //     console.log("Replace last single barline with end barline");
-            // } else {
-            //     barLine = chunks[i];
-            // }
-
-
-            // TODO: if last bar, how to replace with |. ?
         }  else if (chunks[i].startsWith("-") || chunks[i].startsWith("^") ) { // ^ -  text above note, - -under note
             // TODO: find a vexflow solution see Vex.Flow.TextNote - test it in TryOut
             if (notes.length > 0) {
                 const text = chunks[i].substr(1).replace(/["]+/g, ''); // remove quotes, remove first char
                 //notes[notes.length-1].text = text;
                 //notes[notes.length-1].textPosition = chunks[i].charAt(0)==='^' ?  "top" : "bottom";
-                console.log("Found text, position: ", text, notes[notes.length - 1].textPosition);
+                //console.log("Found text, position: ", text, notes[notes.length - 1].textPosition);
             }
         } else  { // might be a note or error
             let vfNote="";
@@ -204,12 +191,11 @@ export const parseLilypondString = (lyString) => {
                 if (! noteNames.has(noteName)) { // ERROR
                     alert("Unknown note: " + noteName);
                     return null;
-                    //break;
                 }
                 //console.log("noteName is: ", noteName);
                 vfNote = noteNames.get(noteName);
 
-                //for now octave by absolute notation ' - 1st oct, '' -2nd, none - small, , - great etc.
+                // octave by absolute notation ' - 1st oct, '' -2nd, none - small, , - great etc.
                 let octave;
                 // use better regexp and test for '' ,, etc
                 if (chunks[i].search("'''")>=0) {
@@ -289,41 +275,6 @@ export const parseLilypondString = (lyString) => {
     return stave;
 };
 
-
-// TODO: rework key (include arrays) !
-export const getLyNoteByMidiNoteInKey = (midiNote, key="C") => { // key as tonality like C major, given as 'A' for A major, 'Am' for minor
-    const pitchClass = midiNote%12;
-    const octave = Math.floor(midiNote/12) - 1;
-    let lyNote = "";
-    switch (pitchClass) {
-        case 0: lyNote = "c"; break;
-        case 1: lyNote =  [ "F", "Bb", "Eb", "Cm", "Ab", "Fm", "Db", "Bbm", "Gb", "Ebm", "Cb", "Abm"].includes(key) ? "des" : "cis" ; break;
-        case 2: lyNote = "d"; break;
-        case 3: lyNote =  [ "C", "F", "Bb", "Gm", "Eb", "Cm", "Ab", "Fm", "Db", "Bbm", "Gb", "Ebm", "Cb", "Abm"].includes(key) ? "es" : "dis" ; break;
-        case 4: lyNote = "e"; break;
-        case 5: lyNote = "f"; break;
-        case 6: lyNote = [ "F", "Bb", "Eb", "Ab", "Fm", "Db", "Bbm", "Gb", "Ebm", "Cb", "Abm"].includes(key) ? "gis" : "fis";  break;
-        case 7: lyNote = "g"; break;
-        case 8: lyNote = [ "F", "Bb", "Gm", "Eb", "Cm", "Ab", "Fm", "Db", "Bbm", "Gb", "Ebm", "Cb", "Abm"].includes(key) ? "as" : "gis";  break;
-        case 9: lyNote = "a"; break;
-        case 10: lyNote = [ "G", "D", "F", "Dm", "Bb", "Gm", "Eb", "Cm", "Ab", "Fm", "Db", "Bbm", "Gb", "Ebm", "Cb", "Abm"].includes(key) ? "b" : "ais";  break;
-        case 11: lyNote = "h"; break;
-        default: lyNote = "";
-    }
-    if (!lyNote) {
-        return "";
-    }  else {
-        switch (octave) {
-            case 2: lyNote += `,`; break;
-            case 4: lyNote += `'`; break;
-            case 5: lyNote += `''`; break;
-            case 6: lyNote += `'''`; break;
-        }
-        // console.log("Detected lyNote: ", lyNote, pitchClass, octave, key);
-        return lyNote;
-    }
-
-}
 
 export const getVfNoteByMidiNoteInKey = (midiNote, key="C") => { // key as tonality like C major, given as 'A' for A major, 'Am' for minor
     const pitchClass = midiNote%12;
@@ -409,8 +360,6 @@ export const notationInfoToLyString = notationInfo => {
 
                         if (note.keys.length>1) {
                             console.log("Chords not supported yet");
-                            //noteString = `<< ${note.keys.join(" ")} >>`;
-                            // noteString = `<<  ${note.keys-> map -> vfNoteToLyNote(key)}  >>` or something similar
                         } else if (note.keys.length === 1) {
                             noteString = vfNoteToLyNote(note.keys[0]);
                             //console.log("note.keys[0], noteString now: ", note.keys[0], noteString );

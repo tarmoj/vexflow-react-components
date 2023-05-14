@@ -16,7 +16,7 @@ import classNames from 'classnames';
 import {
     addMeasure, removeMeasure,
     deepClone,
-    getLyNoteByMidiNoteInKey, getVfNoteByMidiNoteInKey,
+    getVfNoteByMidiNoteInKey,
     notationInfoToLyString,
     noteNames,
     parseLilypondDictation
@@ -48,11 +48,8 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
 
     const [keyboardStartingOctave, setKeyboardStartingOctave ] = useState(3);
     const [lyInput, setLyInput] = useState(lyStart);
-    const [currentKey, setCurrentKey] = useState("C");
     const [currentClef, setCurrentClef] = useState("treble");
     const [currentDuration, setCurrentDuration] = useState("4");
-    const [dotted, setDotted] = useState(false); // empty string or "d" ; in future could be also "dd"
-    const [lyFocus, setLyFocus] = useState(false);
     const [dialogOpen, setDialogOpen] = useState(false);
     const [showLilypond, setShowLilypond] = useState(showTimeAndClefInput); // init with true, if header row is shown -  that means it is in editor mode
 
@@ -72,73 +69,74 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const onKeyDown = (e) => {
         const noteNameKeys = ["c", "d", "e", "f", "g", "a", "b", "h"];
         //console.log("key pressed: ", e.key, e.ctrlKey, e.ctrl);
-        if (lyFocus) {
-            if (e.key==="Enter" && e.ctrlKey) {
-                //console.log("Ctrl + return pressed in lyinput");
-                handleLyNotation();
-                e.preventDefault(); // cancel default
+        //e.preventDefault(); // cancel default. Not sure if it good though
+        // e.stopPropagation();
+        if (noteNameKeys.includes(e.key.toLowerCase())) {
+
+            const noteName = (e.key.toLowerCase()==="h") ? "B": (e.key.toLowerCase()==="b" ) ? "Bb" : e.key.toUpperCase() ;
+            //console.log("Note from key", noteName);
+            let octave = (e.key.toLowerCase() === e.key ) ? "4" : "5"; // uppercase letters give 2nd octave; what about small?
+            if (e.ctrlKey) { // Ctrl + noteName -  small octava
+                octave = "3";
+            }
+            inputHandler(noteName+"/" + octave, currentDuration);
+        } else if (e.key === "ArrowLeft") {
+            if (e.ctrlKey) {
+                console.log("Control left");
+                nextMeasure(-1);
+                e.preventDefault();
+                e.stopPropagation();
+            } else {
+                //console.log("Just arrow left")
+                nextNote(-1);
+                e.preventDefault();
                 e.stopPropagation();
             }
-
-        } else  { // ignore keys when focus in lilypond input
-            e.preventDefault(); // cancel default. Not sure if it good though
+        } else if (e.key === "ArrowRight") {
+            if (e.ctrlKey) {
+                nextMeasure(1);
+                e.preventDefault();
+                e.stopPropagation();
+            } else {
+                //console.log("Just arrow right")
+                nextNote(1);
+                e.preventDefault();
+                e.stopPropagation();
+            }
+        } else if (e.key === "ArrowUp") {
+            noteStep(1);
+            // perhaps ctrl + up/down -  change octava?
+            e.preventDefault();
             e.stopPropagation();
-            if (noteNameKeys.includes(e.key.toLowerCase())) {
-
-                const noteName = (e.key.toLowerCase()==="h") ? "B": (e.key.toLowerCase()==="b" ) ? "Bb" : e.key.toUpperCase() ;
-                console.log("Note from key", noteName);
-                let octave = (e.key.toLowerCase() === e.key ) ? "4" : "5"; // uppercase letters give 2nd octave; what about small?
-                if (e.ctrlKey) { // Ctrl + noteName -  small octava
-                    octave = "3";
-                }
-                inputHandler(noteName+"/" + octave, currentDuration);
-            } else if (e.key === "ArrowLeft") {
-                if (e.ctrlKey) {
-                    console.log("Control left");
-                    nextMeasure(-1);
-                } else {
-                    //console.log("Just arrow left")
-                    nextNote(-1);
-                }
-            } else if (e.key === "ArrowRight") {
-                if (e.ctrlKey) {
-                    nextMeasure(1);
-                } else {
-                    //console.log("Just arrow right")
-                    nextNote(1);
-                }
-            } else if (e.key === "ArrowUp") {
-                noteStep(1);
-                // perhaps ctrl + up/down -  change octava?
-                e.preventDefault();
-                e.stopPropagation();
-            } else if (e.key === "ArrowDown") {
-                noteStep(-1);
-                e.preventDefault();
-                e.stopPropagation();
-            }  else if (e.key === "+") {
-                addBar();
-            }
-            else if (e.key === "1") {
-                durationChange("1" +  (dotted ? "d" : "" ));
-            } else if (e.key === "2") {
-                durationChange("2" +  (dotted ? "d" : "" ));
-            } else if (e.key === "4") {
-                durationChange("4" +  (dotted ? "d" : "" ));
-            } else if (e.key === "8") {
-                durationChange("8" +  (dotted ? "d" : "" ));
-            } else if (e.key === "6") {
-                durationChange("16" +  (dotted ? "d" : "" ));
-            } else if (e.key === ".") {
-                dotChange();
-            } else if (e.key === "r") {
-                restHandler();
-            } else if (e.key === "t") { // tie
-                tieChange();
-            } else if (e.key === "Backspace" || e.key === "Delete") {
-                deleteHandler();
-            }
+        } else if (e.key === "ArrowDown") {
+            noteStep(-1);
+            e.preventDefault();
+            e.stopPropagation();
+        }  else if (e.key === "+") {
+            addBar();
+            e.preventDefault();
+            e.stopPropagation();
         }
+        else if (e.key === "1") {
+            durationChange("1" );
+        } else if (e.key === "2") {
+            durationChange("2" );
+        } else if (e.key === "4") {
+            durationChange("4" );
+        } else if (e.key === "8") {
+            durationChange("8" );
+        } else if (e.key === "6") {
+            durationChange("16" );
+        } else if (e.key === ".") {
+            dotChange();
+        } else if (e.key === "r") {
+            restHandler();
+        } else if (e.key === "t") { // tie
+            tieChange();
+        } else if (e.key === "Backspace" || e.key === "Delete") {
+            deleteHandler();
+        }
+
     }
 
     //useEffect( () => console.log("selectedNote: ", selectedNote), [selectedNote] );
@@ -186,18 +184,15 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const replaceNote =  (position, keys, duration) =>  { // position { measure: , note: staff: }
 
         const notation = deepClone(notationInfo);
-
         const measureIndex = position.measure || 0;
         const noteIndex =  position.note || 0;
         const staff = position.staff || 0;
 
-        console.log("Add note to position ", measureIndex, noteIndex);
+        //console.log("Add note to position ", measureIndex, noteIndex);
         notation.staves[staff].measures[measureIndex].notes[noteIndex] = {
             clef: currentClef, keys: keys, duration: duration, auto_stem: "true"
-        }; // + other fields later
+        };
 
-        //console.log("Notes: ", notation.staves[staff].measures[measureIndex].notes)
-        // does this trigger re-render for react component?
         setNotationInfo(notation);
     }
 
@@ -209,19 +204,13 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
         const noteIndex =  position.note || 0;
         const staff = position.staff || 0;
 
-        console.log("Insert note to position ", measureIndex, noteIndex);
+        //console.log("Insert note to position ", measureIndex, noteIndex);
         notation.staves[staff].measures[measureIndex].notes.splice(noteIndex, 0,  {
             clef: currentClef, keys: keys, duration: duration, auto_stem: "true"
         } );
-        console.log("Notes after insert: ", notation.staves[staff].measures[measureIndex].notes)
+        //console.log("Notes after insert: ", notation.staves[staff].measures[measureIndex].notes)
 
-
-        // does this trigger re-render for react component?
         setNotationInfo(notation);
-        // if (setSelectedNote) {
-        //     setSelectedNote(position);
-        // }
-
     }
 
     const addNote = (keys, duration) => { // add note to the end of the bar
@@ -253,8 +242,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
 
         notation.staves[staff].measures[measureIndex].notes.splice(noteIndex, 1);
 
-        console.log("Notes: ", notation.staves[staff].measures[measureIndex].notes)
-        // does this trigger re-render for react component?
+        //console.log("Notes: ", notation.staves[staff].measures[measureIndex].notes)
         setNotationInfo(notation);
     }
 
@@ -281,7 +269,6 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
         setNotationInfo(newNotationInfo);
     }
 
-    // TODO - mõtle siin ,kuidas asendada viimane noot, kui selle mingi operatsioon. Viimase noodi valimine tehtud, aga vaja anda ka positsioon
     const getCurrentNote = () => { // returns the selected note or one before if at the end of the bar
         let note = null;
         if (selectedNote.note>=0 ) {
@@ -357,7 +344,6 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
 
     const dotChange = () => {
 
-        //let note = null;
         if (selectedNote.note>=0) {
             if (selectedNote.note - parseInt(selectedNote.note)===0.5) {
                 console.log("Selection between notes, no dot");
@@ -381,17 +367,11 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
 
     const tieChange = () => { // adds or removes tie to the note
 
-
-
         const notation = deepClone(notationInfo);
-        console.log("Set/unset tie");
-        // TODO: position:
+        //console.log("Set/unset tie");
 
         const note = selectedNote.note>=0 ? notation.staves[selectedNote.staff].measures[selectedNote.measure].notes[selectedNote.note] :
             notation.staves[selectedNote.staff].measures[selectedNote.measure].notes.at(-1);
-
-        // what if the note is the last one in th bar?
-
 
         if (!note) {
             console.log("No note");
@@ -409,7 +389,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     }
 
     const durationChange = (newDuration) => {
-        console.log("setting new duration to: ", newDuration);
+        //console.log("setting new duration to: ", newDuration);
         if (selectedNote.note>=0) { // Need to update notation
             const note = notationInfo.staves[selectedNote.staff].measures[selectedNote.measure].notes[selectedNote.note]
             const vfNote = note.keys[0]; // NB! chords not supported!
@@ -449,29 +429,22 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     }
 
     const handlePlayNote = midiNote => { // called when a MIDI keyboard key is pressed
-        const key = notationInfo.staves[0].key; //currentKey ? currentKey : "C";
-        console.log ("We are in key: ",  key);
-
-
+        const key = notationInfo.staves[0].key;
+        //console.log ("We are in key: ",  key);
         const vfNote = getVfNoteByMidiNoteInKey(midiNote, key);
-        //console.log("vfnote: ", vfNote);
-        //console.log("Notation at this point: ", notationInfo);
         if (vfNote) {
             noteChange(vfNote);
         }
-
     }
 
 
     const handleLyNotation = () => {
-        //console.log("commented out...");
         const notation = parseLilypondDictation(lyInput);
         if (notation && setNotationInfo) {
             setNotationInfo(notation);
         } else {
             console.log("Notation error or setter not set");
         }
-
     }
 
     // extended from: https://github.com/kevinsqi/react-piano/blob/a8fac9f1ab0aab8fd21658714f1ad9f14568feee/src/ControlledPiano.js#L29
@@ -499,7 +472,6 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const handleKeySelect = (event) => {
         const key = event.target.value;
         console.log("selected key: ", key);
-        setCurrentKey(key); // inf form C, Cm, C# etc
         const notation = deepClone(notationInfo);
         // set it to all staves
         for (let stave of notation.staves) {
@@ -512,7 +484,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
         const clef = event.target.value;
         setCurrentClef(clef); // NB! this does not update already existing VF stavenotes' clef value!
         const notation = deepClone(notationInfo);
-        // TODO: time and key should be the same for all staves in notationInfo
+        // time and key should be the same for all staves in notationInfo
         // temporary- set only for the first stave -  two voiced dictations not supported
         if (clef==="bass") {
             setKeyboardStartingOctave(2);
@@ -527,7 +499,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const handleTimeSelect = (event) => {
         const time = event.target.value;
         const notation = deepClone(notationInfo);
-        // TODO: time and key should be the same for all staves in notationInfo
+        // time and key should be the same for all staves in notationInfo
         // temporary- set for all staves
         for (let stave of notation.staves) {
             stave.time = time;
@@ -544,7 +516,6 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
                         <InputLabel id="keyLabel">{t.key || "Key"}</InputLabel>
                         <Select
                             labelId="keyLabel"
-                            // value={selectedKey}
                             defaultValue={"C"}
                             onChange={handleKeySelect}
                         >
@@ -656,12 +627,11 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
                     <ToggleButtonGroup
                         value={currentDuration}
                         exclusive
-                        onChange={ event => durationChange(event.currentTarget.value +  (dotted ? "d" : "" ) ) }
+                        onChange={ event => durationChange(event.currentTarget.value ) }
                         aria-label="duration selection"
                     >
                         <ToggleButton value="1" aria-label="whole note" >
                             <img src={WholeNote} />
-                            {/*<label style={{color:"red", fontSize:"0.5em", textAlign:"left",  left:"3", top:"-20" }} >1</label>*/}
                         </ToggleButton>
                         <ToggleButton value="2" aria-label="half note">
                             <img src={HalfNote} />

@@ -14,11 +14,10 @@ export function NotationView({
                                  height = 140,
                                  staffHeight = 100,
                                  selectedNote,
-                                 setSelectedNote,
-                                 t
+                                 setSelectedNote
                              }) {
-    const container = useRef()
-    const rendererRef = useRef()
+    const container = useRef();
+    const rendererRef = useRef();
 
     const [staveInfo, setStaveInfo] = useState([[],[]]); // this holds vexflow objects, organised by score staves, array contanin: {vfStave, staveNotes}
     const scale = 1;
@@ -40,14 +39,12 @@ export function NotationView({
         context.clear();
         context.setFont('Arial', 10, '').setBackgroundFillStyle('#eeeedd');
 
-        //console.log("Selected note in draw hook: ", selectedNote);
-
         draw(notationInfo, context); // should we also pass renderer?
 
     }, [notationInfo, width, height, selectedNote]);
 
     useEffect( () => {
-        rendererRef.current.getContext().svg.onclick = (event) => handleClick(event); // update if number of bars changed
+        rendererRef.current.getContext().svg.onclick = (event) => handleClick(event); // update if number of bars is changed
     }, [staveInfo] );
 
 
@@ -86,20 +83,13 @@ export function NotationView({
 
     };
 
-    const setColor = (staveNote, color) => {
-
-        // if (! staveNote.style) { // if not defined, default is black, make it red
-        //     color = "red"
-        // } else {
-        //     color = staveNote.style.fillStyle === "red" ? "black" : "red";   // otherwise switch
-        // }
-
-        const style = {fillStyle: color, strokeStyle: color};
-        staveNote.setStyle(style);
-        staveNote.setStemStyle(style);
-        staveNote.setFlagStyle(style);
-        staveNote.setContext(rendererRef.current.getContext()).draw();
-    }
+    // const setColor = (staveNote, color) => {
+    //     const style = {fillStyle: color, strokeStyle: color};
+    //     staveNote.setStyle(style);
+    //     staveNote.setStemStyle(style);
+    //     staveNote.setFlagStyle(style);
+    //     staveNote.setContext(rendererRef.current.getContext()).draw();
+    // }
 
 
     const getClickPositionByX = (x, staffIndex=0) => {
@@ -111,7 +101,7 @@ export function NotationView({
             //console.log("Stave coordinates: ", vfStave.getX(), vfStave.getNoteStartX(), vfStave.getNoteEndX(), vfStave.getWidth());
             if (x>=vfStave.getX() && x<=vfStave.getNoteEndX()) { // was .getNoteStartX, but this is wrong in bar 1
                 measureIndex = i;
-                console.log("Stave click in m. index ", measureIndex);
+                //console.log("Stave click in m. index ", measureIndex);
                 break;
             }
         }
@@ -135,7 +125,7 @@ export function NotationView({
         }
 
         if ( x<staveInfo[staffIndex][measureIndex].staveNotes.at(0).getNoteHeadBeginX()-padding ) {
-            console.log("click before last note in bar", measureIndex);
+            //console.log("click before last note in bar", measureIndex);
             return {note: 0, measure: measureIndex, staff: staffIndex}
         }
 
@@ -148,9 +138,8 @@ export function NotationView({
             if (x>= note.getNoteHeadBeginX()-padding && x<=note.getNoteHeadEndX()+padding ) {
                 noteIndex = i;
             } else if (nextNote && x>note.getNoteHeadEndX()+padding && x<nextNote.getNoteHeadBeginX()-padding) {
-                console.log("click In between after ", i);
+                //console.log("click In between after ", i);
                 noteIndex = i + 0.5;
-
             }
         }
         const position = {note: noteIndex, measure: measureIndex, staff: staffIndex};
@@ -162,9 +151,8 @@ export function NotationView({
 
 
     const draw = (notationInfo, context) => {
-        //const vfStaves = [[], []]; //  NB! think of better name! this is vexflow staves actually. do we need to store them at all? -  later: define by stave count [ Array(notationIfo.staves.length ]
+
         const defaultWidth = 200;
-        //const currentPositionInfo = [];
         const newStaveInfo = [[],[]];
         const allStaveNotes = [[],[]];
         //How can I pre-calculate the width of a voice?
@@ -182,7 +170,6 @@ export function NotationView({
         for (let measureIndex = 0; measureIndex < notationInfo.staves[0].measures.length; measureIndex++) { // should we check if there is equal amount of measures?
             let measureWidth = defaultWidth;
             let staffBeams = [];
-            //let ties = [];
 
             // if (measureIndex === 0) { // OR: hasOwnProperty("clef" etc
             //   measureWidth += clefAndKeySpace;
@@ -198,7 +185,6 @@ export function NotationView({
                 const notationMeasure = staff.measures[measureIndex];
 
                 const newMeasure = new VF.Stave(startX, startY + staffIndex * staffHeight, measureWidth);
-                //newMeasure.setMeasure(measureIndex+1);
 
                 if (measureIndex === 0) { // OR: hasOwnProperty("clef" etc
                     newMeasure.addClef(staff.clef).addKeySignature(staff.key).addTimeSignature(staff.time);
@@ -228,7 +214,6 @@ export function NotationView({
                 let noteIndex = 0;
                 for (let note of notationMeasure.notes) {
                     const staveNote = new VF.StaveNote(note);
-                    //currentPositionInfo.push( { staveNote : staveNote, position : {note: noteIndex, measure: measureIndex, staff: staffIndex} } )
 
                     if (note.hasOwnProperty("color")) {
                         staveNote.setStyle({fillStyle: note.color, strokeStyle: note.color});
@@ -292,12 +277,7 @@ export function NotationView({
             voices.forEach((v) => v.setContext(context).draw());
             staffBeams.forEach((beam) => beam.setContext(context).draw());
 
-            // and other drawings -  ties, tuplets, slurs etc
-
-            // ties.forEach((t) => {
-            //     t.setContext(context).draw();
-            // });
-
+            // later - probably draw tuplets here
 
             // staveconnector
             if (notationInfo.staves.length>1) {
