@@ -23,18 +23,6 @@ import {
 } from "./notationUtils";
 import {NotationView} from "./NotationView";
 
-import Tie from './images/tie.png';
-import WholeNote from "./images/whole.png" ; // require() does not work with Preview, do separate imports
-import HalfNote from "./images/half.png"
-import QuarterNote from "./images/quarter.png"
-import EightNote from "./images/eighth.png"
-import SixteenthNote from "./images/sixteenth.png"
-import Dot from "./images/dot.png"
-import Rest from "./images/rest.png"
-import AddBar from "./images/add-bar.png"
-import NoteUp from "./images/note-up.png"
-import NoteDown from "./images/note-down.png"
-import DeleteBar from "./images/delete-bar.png"
 
 import BackspaceIcon from '@mui/icons-material/Backspace';
 import HelpOutlineIcon from '@mui/icons-material/HelpOutline';
@@ -44,7 +32,9 @@ import NavigateBeforeIcon from '@mui/icons-material/NavigateBefore';
 
 
 export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedNote,
-                                setSelectedNote, t, resizeFunction, showTimeAndClefInput=false }) {
+                                setSelectedNote, t, resizeFunction,
+                                  showTimeAndClefInput=false, iconsPath = "./"
+                              }) {
 
     const [keyboardStartingOctave, setKeyboardStartingOctave ] = useState(3);
     const [lyInput, setLyInput] = useState(lyStart);
@@ -54,6 +44,9 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const [showLilypond, setShowLilypond] = useState(showTimeAndClefInput); // init with true, if header row is shown -  that means it is in editor mode
 
     // notation functions (add, insert, delete
+
+    // temporary:
+    console.log("iconsPath in NotationInput",iconsPath);
 
     useEffect( () => {
         setLyInput(notationInfoToLyString(notationInfo));
@@ -631,34 +624,34 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
                         aria-label="duration selection"
                     >
                         <ToggleButton value="1" aria-label="whole note" >
-                            <img src={WholeNote} />
+                            <img src={ iconsPath + "whole.png"} />
                         </ToggleButton>
                         <ToggleButton value="2" aria-label="half note">
-                            <img src={HalfNote} />
+                            <img src={iconsPath + "half.png"} />
                         </ToggleButton>
                         <ToggleButton value="4" aria-label="quarter note">
-                            <img src={QuarterNote} />
+                            <img src={iconsPath + "quarter.png"} />
                         </ToggleButton>
                         <ToggleButton value="8" aria-label="eighth note">
-                            <img src={EightNote} />
+                            <img src={iconsPath + "eighth.png"} />
                         </ToggleButton>
                         <ToggleButton value="16" aria-label="sixteenth note">
-                            <img src={SixteenthNote} />
+                            <img src={iconsPath + "sixteenth.png"} />
                         </ToggleButton>
                     </ToggleButtonGroup>
                 </Grid>
                 {/*ToggleButtons is used down here to give similar look, they are simple buttons by function*/}
                 <Grid item>
                     <ToggleButton sx={{height:51}} value={"."} aria-label={"add or remove dot"}  onClick={() => dotChange()}>
-                       <img src={Dot} />
+                       <img src={iconsPath + "dot.png"} />
                     </ToggleButton>
                 </Grid>
                 <Grid item>
-                    <ToggleButton  value={"rest"} aria-label={"rest"}  onClick={() => restHandler()}><img src={Rest} /></ToggleButton>
+                    <ToggleButton  value={"rest"} aria-label={"rest"}  onClick={() => restHandler()}><img src={iconsPath + "rest.png"} /></ToggleButton>
                 </Grid>
                 <Grid item>
                     <ToggleButton sx={{height:51}} value={"tie"} aria-label={"add or remove tie"}  onClick={()=>tieChange()}>
-                        <img src={Tie}/>
+                        <img src={iconsPath + "tie.png"}/>
                     </ToggleButton>
                 </Grid>
                 <Grid item>
@@ -669,16 +662,16 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
             </Grid>
                 <Grid container item direction={"row"} spacing={1} alignItems={"center"}>
                     <Grid item>
-                        <ToggleButton sx={{height:51}} value={"noteUp"} aria-label={"note up"} onClick={()=>noteStep(1)}><img src={NoteUp} /></ToggleButton>
+                        <ToggleButton sx={{height:51}} value={"noteUp"} aria-label={"note up"} onClick={()=>noteStep(1)}><img src={iconsPath + "note-up.png"} /></ToggleButton>
                     </Grid>
                     <Grid item>
-                        <ToggleButton sx={{height:51}} value={"noteDown"} aria-label={"note down"} onClick={()=>noteStep(-1)}><img src={NoteDown} /></ToggleButton>
+                        <ToggleButton sx={{height:51}} value={"noteDown"} aria-label={"note down"} onClick={()=>noteStep(-1)}><img src={iconsPath + "note-down.png"} /></ToggleButton>
                     </Grid>
                     <Grid item>
-                        <ToggleButton sx={{height:51}} value={"addBar"} aria-label={"add bar"} onClick={()=>addBar()}><img src={AddBar} /></ToggleButton>
+                        <ToggleButton sx={{height:51}} value={"addBar"} aria-label={"add bar"} onClick={()=>addBar()}><img src={iconsPath + "add-bar.png"} /></ToggleButton>
                     </Grid>
                     <Grid item>
-                        <ToggleButton sx={{height:51}} value={"deleteBar"} aria-label={"delete bar"} onClick={()=>deleteBar()}><img src={DeleteBar} /></ToggleButton>
+                        <ToggleButton sx={{height:51}} value={"deleteBar"} aria-label={"delete bar"} onClick={()=>deleteBar()}><img src={iconsPath + "delete-bar.png"} /></ToggleButton>
                     </Grid>
                     <Grid item>
                         {createShortcutsDialog()}
