@@ -43,11 +43,6 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
     const [dialogOpen, setDialogOpen] = useState(false);
     const [showLilypond, setShowLilypond] = useState(showTimeAndClefInput); // init with true, if header row is shown -  that means it is in editor mode
 
-    // notation functions (add, insert, delete
-
-    // temporary:
-    console.log("iconsPath in NotationInput",iconsPath);
-
     useEffect( () => {
         setLyInput(notationInfoToLyString(notationInfo));
     } , [notationInfo]);
