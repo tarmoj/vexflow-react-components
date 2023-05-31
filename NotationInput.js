@@ -10,6 +10,7 @@ import {
     ToggleButton,
     ToggleButtonGroup
 } from "@mui/material";
+import CloseIcon from '@mui/icons-material/Close';
 import {Piano} from "react-piano";
 import 'react-piano/dist/styles.css';
 import classNames from 'classnames';
@@ -686,7 +687,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
                     <HelpOutlineIcon />
                 </IconButton>
                 <Dialog onClose={()=>setDialogOpen(false)} open={dialogOpen}>
-                    <DialogTitle>{t.keyboardShortcuts}</DialogTitle>
+                    <DialogTitle>{t.keyboardShortcuts} </DialogTitle>
                     <DialogContent>
                         <DialogContentText>
                             {t.youCanUseFollowingShortcuts} <br />
@@ -706,7 +707,7 @@ export function NotationInput({lyStart, setNotationInfo, notationInfo, selectedN
                         </DialogContentText>
                     </DialogContent>
                     <DialogActions>
-                        <Button onClick={()=>setDialogOpen(false)}>Close</Button>
+                        <IconButton onClick={()=>setDialogOpen(false)} aria-label={"close"}><CloseIcon /></IconButton>
                     </DialogActions>
                 </Dialog>
             </Grid>
